@@ -60,7 +60,18 @@ export default function App() {
       {/* Floating iOS Emojis Overlay */}
       <FloatingEmojis items={floatingEmojis} />
 
-      <main id="top" className="mx-auto max-w-6xl px-5 sm:px-8 pt-10 sm:pt-14 pb-20 space-y-12 sm:space-y-16">
+      <main id="top" className="mx-auto max-w-6xl px-5 sm:px-8 pt-10 sm:pt-14 pb-20 space-y-10 sm:space-y-12">
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
+          className="text-center"
+        >
+          <h1 className="font-display text-5xl sm:text-6xl lg:text-[4.5rem] font-semibold tracking-tight leading-tight text-[#351d26] [text-wrap:balance]">
+            My Krutika Jii <span className="ios-emoji text-4xl sm:text-5xl align-middle">🥹💖</span>
+          </h1>
+        </motion.div>
+
         {/* Main Studio: Poetic Hindi Letter + Guzarish (0:20 - 1:30) Glass Player */}
         <section className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           <div className="lg:col-span-7">

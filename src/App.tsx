@@ -1,17 +1,41 @@
-import { useCallback, useRef, useState } from 'react';
-import { motion } from 'motion/react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { AnimatePresence, motion } from 'motion/react';
+import { AgreementPage } from './components/AgreementPage';
+import { AlfaazPage } from './components/AlfaazPage';
 import { FloatingEmojis, FloatingEmojiItem } from './components/FloatingEmojis';
 import { GuzarishPlayer } from './components/GuzarishPlayer';
+import { PataChalgeaPage } from './components/PataChalgeaPage';
 import { RomanticLetter } from './components/RomanticLetter';
+import { SmilesGalleryPage } from './components/SmilesGalleryPage';
 
 const SHOWER_POOL = ['💖', '🥹', '🫶🏻', '🌷', '✨', '🤍', '👀', '🌙', '🎶'];
 
+type PageView = 'home' | 'smiles' | 'agreement' | 'alfaaz' | 'pata-chalgea';
+
+function getPageFromHash(): PageView {
+  if (window.location.hash === '#pata-chalgea') return 'pata-chalgea';
+  if (window.location.hash === '#alfaaz') return 'alfaaz';
+  if (window.location.hash === '#agreement') return 'agreement';
+  if (window.location.hash === '#smiles') return 'smiles';
+  return 'home';
+}
+
 export default function App() {
+  const [currentPage, setCurrentPage] = useState<PageView>(getPageFromHash);
   const [isSongPlaying, setIsSongPlaying] = useState(false);
   const [fadeKey, setFadeKey] = useState(1);
   const [floatingEmojis, setFloatingEmojis] = useState<FloatingEmojiItem[]>([]);
   const [loveCount, setLoveCount] = useState(0);
+  const [agreementScreenshotUrl, setAgreementScreenshotUrl] = useState<string | null>(null);
   const nextIdRef = useRef(1);
+
+  useEffect(() => {
+    const handlePopState = () => {
+      setCurrentPage(getPageFromHash());
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   const spawnEmoji = useCallback((emoji: string, count = 1) => {
     const batch: FloatingEmojiItem[] = [];
@@ -48,6 +72,57 @@ export default function App() {
     setFadeKey((prev) => prev + 1);
   }, []);
 
+  const openSmilesPage = useCallback(() => {
+    triggerHeartShower();
+    setCurrentPage('smiles');
+    if (window.location.hash !== '#smiles') {
+      window.history.pushState({ page: 'smiles' }, '', '#smiles');
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [triggerHeartShower]);
+
+  const openAgreementPage = useCallback(() => {
+    spawnEmoji('🙈', 2);
+    spawnEmoji('🤌🏻', 2);
+    spawnEmoji('🌨️', 2);
+    setCurrentPage('agreement');
+    if (window.location.hash !== '#agreement') {
+      window.history.pushState({ page: 'agreement' }, '', '#agreement');
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [spawnEmoji]);
+
+  const openAlfaazPage = useCallback(() => {
+    spawnEmoji('🥹', 2);
+    spawnEmoji('🌷', 2);
+    spawnEmoji('🌨️', 2);
+    setCurrentPage('alfaaz');
+    if (window.location.hash !== '#alfaaz') {
+      window.history.pushState({ page: 'alfaaz' }, '', '#alfaaz');
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [spawnEmoji]);
+
+  const openPataChalgeaPage = useCallback(() => {
+    spawnEmoji('🫠', 2);
+    spawnEmoji('🌨️', 2);
+    spawnEmoji('🌷', 2);
+    spawnEmoji('✨', 2);
+    setCurrentPage('pata-chalgea');
+    if (window.location.hash !== '#pata-chalgea') {
+      window.history.pushState({ page: 'pata-chalgea' }, '', '#pata-chalgea');
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [spawnEmoji]);
+
+  const backToHome = useCallback(() => {
+    setCurrentPage('home');
+    if (window.location.hash) {
+      window.history.pushState({ page: 'home' }, '', window.location.pathname);
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
   return (
     <div className="relative min-h-screen overflow-hidden text-[#351d26]">
       {/* Ambient Soft Pastel Glass Orbs */}
@@ -60,7 +135,50 @@ export default function App() {
       {/* Floating iOS Emojis Overlay */}
       <FloatingEmojis items={floatingEmojis} />
 
-      <main id="top" className="mx-auto max-w-6xl px-5 sm:px-8 pt-10 sm:pt-14 pb-20 space-y-10 sm:space-y-12">
+      <AnimatePresence mode="wait">
+        {currentPage === 'pata-chalgea' ? (
+          <PataChalgeaPage
+            key="pata-chalgea-page"
+            onBack={openAlfaazPage}
+            onSpawnEmoji={spawnEmoji}
+            onTriggerShower={triggerHeartShower}
+          />
+        ) : currentPage === 'alfaaz' ? (
+          <AlfaazPage
+            key="alfaaz-page"
+            onBack={openAgreementPage}
+            onSpawnEmoji={spawnEmoji}
+            onTriggerShower={triggerHeartShower}
+            onOpenNext={openPataChalgeaPage}
+          />
+        ) : currentPage === 'agreement' ? (
+          <AgreementPage
+            key="agreement-page"
+            onBack={openSmilesPage}
+            onSpawnEmoji={spawnEmoji}
+            onRedirectToSong={openAlfaazPage}
+            agreed={agreementScreenshotUrl !== null}
+            screenshotUrl={agreementScreenshotUrl}
+            onAgreementCaptured={setAgreementScreenshotUrl}
+          />
+        ) : currentPage === 'smiles' ? (
+          <SmilesGalleryPage
+            key="smiles-page"
+            onBack={backToHome}
+            onSpawnEmoji={spawnEmoji}
+            onTriggerShower={triggerHeartShower}
+            onOpenAgreement={openAgreementPage}
+          />
+        ) : (
+          <motion.main
+            key="home-page"
+            id="top"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.4 }}
+            className="mx-auto max-w-6xl px-5 sm:px-8 pt-10 sm:pt-14 pb-20 space-y-10 sm:space-y-12"
+          >
         <motion.div
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
@@ -157,14 +275,16 @@ export default function App() {
 
           <button
             type="button"
-            onClick={triggerHeartShower}
-            className="glass-pill-button inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-medium text-[#5c3543] transition-transform duration-150 hover:scale-[1.03] active:scale-[0.97] cursor-pointer whitespace-nowrap"
+            onClick={openSmilesPage}
+            className="glass-accent-button inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-xs sm:text-sm font-semibold text-white transition-transform duration-150 hover:scale-[1.03] active:scale-[0.97] cursor-pointer whitespace-nowrap"
           >
-            <span className="ios-emoji">🥹</span>
-            <span>Send Another Smile</span>
+            <span className="ios-emoji">🥹💖</span>
+            <span>Send More Smile</span>
           </button>
         </footer>
-      </main>
+      </motion.main>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

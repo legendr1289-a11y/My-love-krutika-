@@ -12,48 +12,11 @@ import {
   VolumeX,
 } from 'lucide-react';
 import { motion } from 'motion/react';
+import type { YTPlayerInstance } from '../types/youtube';
 
 export const GUZARISH_START_SEC = 20; // 0:20
 export const GUZARISH_END_SEC = 90; // 1:30
 const YOUTUBE_VIDEO_ID = 'clzuRgaV5dw';
-
-interface YTPlayerInstance {
-  playVideo: () => void;
-  pauseVideo: () => void;
-  seekTo: (seconds: number, allowSeekAhead?: boolean) => void;
-  getCurrentTime: () => number;
-  getPlayerState: () => number;
-  mute: () => void;
-  unMute: () => void;
-  isMuted: () => boolean;
-  destroy: () => void;
-}
-
-declare global {
-  interface Window {
-    YT?: {
-      Player: new (
-        element: HTMLElement | string,
-        options: {
-          videoId: string;
-          playerVars?: Record<string, string | number>;
-          events?: {
-            onReady?: (event: { target: YTPlayerInstance }) => void;
-            onStateChange?: (event: { data: number; target: YTPlayerInstance }) => void;
-            onError?: (event: { data: number }) => void;
-          };
-        }
-      ) => YTPlayerInstance;
-      PlayerState?: {
-        ENDED: number;
-        PLAYING: number;
-        PAUSED: number;
-        BUFFERING: number;
-      };
-    };
-    onYouTubeIframeAPIReady?: () => void;
-  }
-}
 
 interface GuzarishPlayerProps {
   playTrigger: number;

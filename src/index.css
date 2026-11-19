@@ -1,0 +1,151 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-display: 'Cormorant Garamond', Georgia, serif;
+    --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-hindi: 'Noto Serif Devanagari', Georgia, serif;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    font-family: var(--font-sans);
+    background-color: #fdf6f8;
+    color: #351d26;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    overflow-x: hidden;
+    background:
+      radial-gradient(circle at 14% 16%, rgba(251, 207, 222, 0.55) 0%, transparent 45%),
+      radial-gradient(circle at 86% 20%, rgba(254, 226, 208, 0.58) 0%, transparent 44%),
+      radial-gradient(circle at 52% 84%, rgba(244, 198, 215, 0.42) 0%, transparent 50%),
+      linear-gradient(160deg, #fef9fa 0%, #fbeef2 48%, #fbf2f4 100%);
+  }
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+.font-hindi {
+  font-family: var(--font-hindi);
+}
+
+.ios-emoji {
+  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+  font-style: normal;
+  line-height: 1;
+}
+
+.glass-panel {
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.72) 0%,
+    rgba(255, 248, 250, 0.54) 100%
+  );
+  backdrop-filter: blur(26px) saturate(160%);
+  -webkit-backdrop-filter: blur(26px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow:
+    0 20px 50px -18px rgba(175, 96, 122, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.92);
+}
+
+.glass-pill-button {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.84) 0%,
+    rgba(255, 240, 245, 0.68) 100%
+  );
+  backdrop-filter: blur(18px) saturate(150%);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow:
+    0 8px 24px -8px rgba(175, 96, 122, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.95);
+}
+
+.glass-accent-button {
+  background: linear-gradient(135deg, #d45274 0%, #b83b5e 100%);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow:
+    0 12px 28px -10px rgba(184, 59, 94, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+@keyframes gentle-orb-float {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(18px, -22px, 0) scale(1.04);
+  }
+}
+
+@keyframes gentle-orb-float-reverse {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(-20px, 16px, 0) scale(0.97);
+  }
+}
+
+.animate-orb-slow {
+  animation: gentle-orb-float 16s ease-in-out infinite;
+}
+
+.animate-orb-slow-reverse {
+  animation: gentle-orb-float-reverse 20s ease-in-out infinite;
+}
+
+/* Custom Range Scrubber for Guzarish Timelapse */
+input[type="range"].glass-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+input[type="range"].glass-slider::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 9999px;
+}
+
+input[type="range"].glass-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 9999px;
+  background: #ffffff;
+  border: 2.5px solid #c94a6a;
+  box-shadow: 0 2px 8px rgba(184, 59, 94, 0.35);
+  margin-top: -5px;
+  transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+input[type="range"].glass-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.18);
+}
+
+input[type="range"].glass-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 9999px;
+  background: #ffffff;
+  border: 2.5px solid #c94a6a;
+  box-shadow: 0 2px 8px rgba(184, 59, 94, 0.35);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-orb-slow,
+  .animate-orb-slow-reverse {
+    animation: none;
+  }
+}

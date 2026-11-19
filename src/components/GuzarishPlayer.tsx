@@ -14,9 +14,9 @@ import {
 import { motion } from 'motion/react';
 import type { YTPlayerInstance } from '../types/youtube';
 
-export const GUZARISH_START_SEC = 20; // 0:20
-export const GUZARISH_END_SEC = 90; // 1:30
-const YOUTUBE_VIDEO_ID = 'clzuRgaV5dw';
+export const TRACK_START_SEC = 63; // 1:03
+export const TRACK_END_SEC = 150; // 2:30
+const YOUTUBE_VIDEO_ID = 'esS2W3jodHM';
 
 interface GuzarishPlayerProps {
   playTrigger: number;
@@ -24,13 +24,6 @@ interface GuzarishPlayerProps {
   onPlayingChange: (playing: boolean) => void;
   onSyncPoetryFade: () => void;
   onSpawnEmoji: (emoji: string) => void;
-}
-
-function formatSeconds(sec: number): string {
-  const clamped = Math.max(0, Math.floor(sec));
-  const mins = Math.floor(clamped / 60);
-  const secs = clamped % 60;
-  return `${mins}:${secs.toString().padStart(2, '0')}`;
 }
 
 export function GuzarishPlayer({
@@ -50,7 +43,7 @@ export function GuzarishPlayer({
   const [isLooping, setIsLooping] = useState(true);
   const [showVideo, setShowVideo] = useState(false);
   const [hasError, setHasError] = useState(false);
-  const [currentTime, setCurrentTime] = useState(GUZARISH_START_SEC);
+  const [currentTime, setCurrentTime] = useState(TRACK_START_SEC);
   const [coverImageError, setCoverImageError] = useState(false);
 
   useEffect(() => {
@@ -73,8 +66,8 @@ export function GuzarishPlayer({
         fs: 0,
         modestbranding: 1,
         rel: 0,
-        start: GUZARISH_START_SEC,
-        end: GUZARISH_END_SEC,
+        start: TRACK_START_SEC,
+        end: TRACK_END_SEC,
         playsinline: 1,
         origin: window.location.origin,
       },
@@ -82,7 +75,7 @@ export function GuzarishPlayer({
         onReady: (event) => {
           setIsReady(true);
           setHasError(false);
-          event.target.seekTo(GUZARISH_START_SEC, true);
+          event.target.seekTo(TRACK_START_SEC, true);
         },
         onStateChange: (event) => {
           const YTState = window.YT?.PlayerState;
@@ -90,18 +83,18 @@ export function GuzarishPlayer({
           if (event.data === YTState.PLAYING) {
             setIsPlaying(true);
             const now = event.target.getCurrentTime();
-            if (now < GUZARISH_START_SEC - 0.5 || now >= GUZARISH_END_SEC) {
-              event.target.seekTo(GUZARISH_START_SEC, true);
+            if (now < TRACK_START_SEC - 0.5 || now >= TRACK_END_SEC) {
+              event.target.seekTo(TRACK_START_SEC, true);
             }
           } else if (event.data === YTState.PAUSED) {
             setIsPlaying(false);
           } else if (event.data === YTState.ENDED) {
             if (isLoopingRef.current) {
-              event.target.seekTo(GUZARISH_START_SEC, true);
+              event.target.seekTo(TRACK_START_SEC, true);
               event.target.playVideo();
             } else {
               setIsPlaying(false);
-              setCurrentTime(GUZARISH_END_SEC);
+              setCurrentTime(TRACK_END_SEC);
             }
           }
         },
@@ -145,7 +138,7 @@ export function GuzarishPlayer({
     };
   }, [initPlayer]);
 
-  // Enforce 0:20 - 1:30 timelapse window continuously while playing
+  // Enforce 1:03 - 2:30 timelapse window silently in the background while playing
   useEffect(() => {
     if (!isPlaying || !playerRef.current) return;
 
@@ -156,39 +149,39 @@ export function GuzarishPlayer({
       const t = player.getCurrentTime();
       if (Number.isNaN(t)) return;
 
-      if (t < GUZARISH_START_SEC - 0.5) {
-        player.seekTo(GUZARISH_START_SEC, true);
-        setCurrentTime(GUZARISH_START_SEC);
+      if (t < TRACK_START_SEC - 0.5) {
+        player.seekTo(TRACK_START_SEC, true);
+        setCurrentTime(TRACK_START_SEC);
         return;
       }
 
-      if (t >= GUZARISH_END_SEC) {
+      if (t >= TRACK_END_SEC) {
         if (isLoopingRef.current) {
-          player.seekTo(GUZARISH_START_SEC, true);
-          setCurrentTime(GUZARISH_START_SEC);
+          player.seekTo(TRACK_START_SEC, true);
+          setCurrentTime(TRACK_START_SEC);
         } else {
           player.pauseVideo();
-          player.seekTo(GUZARISH_START_SEC, true);
+          player.seekTo(TRACK_START_SEC, true);
           setIsPlaying(false);
-          setCurrentTime(GUZARISH_START_SEC);
+          setCurrentTime(TRACK_START_SEC);
         }
         return;
       }
 
       setCurrentTime(t);
-    }, 220);
+    }, 200);
 
     return () => window.clearInterval(timer);
   }, [isPlaying]);
 
-  const startFromTwenty = useCallback(
+  const startFromSegment = useCallback(
     (alsoSyncLetter = false) => {
       const player = playerRef.current;
       if (player && isReady) {
         const now = player.getCurrentTime();
-        if (now < GUZARISH_START_SEC || now >= GUZARISH_END_SEC) {
-          player.seekTo(GUZARISH_START_SEC, true);
-          setCurrentTime(GUZARISH_START_SEC);
+        if (now < TRACK_START_SEC || now >= TRACK_END_SEC) {
+          player.seekTo(TRACK_START_SEC, true);
+          setCurrentTime(TRACK_START_SEC);
         }
         if (isMuted) {
           player.unMute();
@@ -206,9 +199,9 @@ export function GuzarishPlayer({
 
   useEffect(() => {
     if (playTrigger > 0) {
-      startFromTwenty(true);
+      startFromSegment(true);
     }
-  }, [playTrigger, startFromTwenty]);
+  }, [playTrigger, startFromSegment]);
 
   useEffect(() => {
     if (pauseTrigger > 0 && playerRef.current && isReady) {
@@ -221,14 +214,14 @@ export function GuzarishPlayer({
     if (isPlaying) {
       playerRef.current.pauseVideo();
     } else {
-      startFromTwenty(false);
+      startFromSegment(false);
     }
   };
 
   const handleRestartSegment = () => {
     if (!playerRef.current || !isReady) return;
-    playerRef.current.seekTo(GUZARISH_START_SEC, true);
-    setCurrentTime(GUZARISH_START_SEC);
+    playerRef.current.seekTo(TRACK_START_SEC, true);
+    setCurrentTime(TRACK_START_SEC);
     playerRef.current.playVideo();
     onSyncPoetryFade();
     onSpawnEmoji('💖');
@@ -246,34 +239,41 @@ export function GuzarishPlayer({
   };
 
   const handleSeek = (val: number) => {
-    const clamped = Math.min(GUZARISH_END_SEC - 0.5, Math.max(GUZARISH_START_SEC, val));
+    const clamped = Math.min(TRACK_END_SEC - 0.5, Math.max(TRACK_START_SEC, val));
     setCurrentTime(clamped);
     if (playerRef.current && isReady) {
+      if (isMuted) {
+        playerRef.current.unMute();
+        setIsMuted(false);
+      }
       playerRef.current.seekTo(clamped, true);
+      playerRef.current.playVideo();
     }
   };
 
-  const totalWindow = GUZARISH_END_SEC - GUZARISH_START_SEC;
+  const totalWindow = TRACK_END_SEC - TRACK_START_SEC;
   const progressPercent = Math.min(
     100,
-    Math.max(0, ((currentTime - GUZARISH_START_SEC) / totalWindow) * 100)
+    Math.max(0, ((currentTime - TRACK_START_SEC) / totalWindow) * 100)
   );
 
   return (
     <aside
-      id="guzarish-player"
+      id="good-luck-charm-player"
       className="glass-panel rounded-3xl p-6 sm:p-7 flex flex-col justify-between gap-6"
     >
       {/* Header Row */}
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-xs font-medium tracking-wide text-[#8c5a6a]">
-            Now Playing · 0:20 – 1:30 Timelapse <span className="ios-emoji">🎶</span>
+            Now Playing <span className="ios-emoji">🎶✨</span>
           </p>
           <h2 className="font-display text-2xl sm:text-3xl font-semibold text-[#351d26] mt-1">
-            Guzarish
+            Good Luck Charm
           </h2>
-          <p className="text-sm text-[#6e4956]">Javed Ali · Ghajini</p>
+          <p className="text-sm text-[#6e4956]">
+            Aman Hayer, K.S. Makhan &amp; Roach Killa
+          </p>
         </div>
 
         <button
@@ -287,7 +287,7 @@ export function GuzarishPlayer({
         </button>
       </div>
 
-      {/* Media Frame (YouTube IFrame always mounted for reliable API playback; Artwork overlay in Cover Mode) */}
+      {/* Media Frame */}
       <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl border border-white/80 bg-[#f6e3e8] shadow-[inset_0_1px_12px_rgba(160,85,110,0.12)]">
         <div
           ref={containerRef}
@@ -301,7 +301,7 @@ export function GuzarishPlayer({
             {!coverImageError ? (
               <img
                 src="/src/assets/images/guzarish_vinyl_art_1795037265702.jpg"
-                alt="Jasmine flowers, blush pink silk, and warm candlelight representing Guzarish"
+                alt="Jasmine flowers, blush pink silk, and warm candlelight for Good Luck Charm"
                 referrerPolicy="no-referrer"
                 onError={() => setCoverImageError(true)}
                 className={`w-full h-full object-cover transition-transform duration-1000 ease-out ${
@@ -312,21 +312,20 @@ export function GuzarishPlayer({
               <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-[#fae4ea] via-[#f6d6e0] to-[#fbe8df] text-[#6e4956] p-6 text-center">
                 <Music2 className="w-10 h-10 text-[#c94a6a] mb-2" />
                 <span className="font-display text-xl font-semibold text-[#351d26]">
-                  Guzarish · Javed Ali
+                  Good Luck Charm
                 </span>
               </div>
             )}
 
-            {/* Soft contrast scrim & animated visualizer bars */}
             <div className="absolute inset-0 bg-gradient-to-t from-[#2a131c]/70 via-[#2a131c]/10 to-transparent" />
 
             <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between gap-3">
               <div className="text-white">
-                <p className="font-hindi text-sm sm:text-base font-medium leading-snug drop-shadow-sm">
-                  “तू मेरी अधूरी प्यास-प्यास...”
+                <p className="font-display text-lg font-semibold leading-snug drop-shadow-sm">
+                  Good Luck Charm <span className="ios-emoji text-base">🥹💖</span>
                 </p>
                 <p className="text-xs text-white/85 mt-0.5">
-                  Romantic Segment · 0:20 to 1:30
+                  Aman Hayer · K.S. Makhan · Roach Killa
                 </p>
               </div>
 
@@ -368,10 +367,10 @@ export function GuzarishPlayer({
       {hasError && (
         <div className="rounded-2xl bg-white/75 border border-rose-200 px-4 py-3 text-xs text-[#6e4956] flex items-center justify-between gap-3">
           <span>
-            Playback was blocked by browser settings. You can open the exact 0:20 mark directly:
+            Playback was blocked by browser settings. Open the track directly:
           </span>
           <a
-            href={`https://www.youtube.com/watch?v=${YOUTUBE_VIDEO_ID}&t=${GUZARISH_START_SEC}s`}
+            href={`https://www.youtube.com/watch?v=${YOUTUBE_VIDEO_ID}&t=${TRACK_START_SEC}s`}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-1 font-semibold text-[#b83b5e] hover:underline whitespace-nowrap shrink-0"
@@ -382,27 +381,22 @@ export function GuzarishPlayer({
         </div>
       )}
 
-      {/* Timelapse Scrubber (0:20 -> 1:30) */}
-      <div className="space-y-2">
+      {/* Clean Adjustable Song Progress Bar (No timeline numbers shown) */}
+      <div className="py-1">
         <div className="relative flex items-center">
           <input
             type="range"
-            aria-label="Guzarish song timelapse between 0:20 and 1:30"
-            min={GUZARISH_START_SEC}
-            max={GUZARISH_END_SEC}
-            step={0.5}
+            aria-label="Adjustable song progress"
+            min={TRACK_START_SEC}
+            max={TRACK_END_SEC}
+            step={0.25}
             value={currentTime}
             onChange={(e) => handleSeek(Number(e.target.value))}
             style={{
               background: `linear-gradient(to right, #c94a6a 0%, #c94a6a ${progressPercent}%, rgba(180, 110, 130, 0.22) ${progressPercent}%, rgba(180, 110, 130, 0.22) 100%)`,
             }}
-            className="glass-slider w-full h-1.5 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c94a6a]/50"
+            className="glass-slider w-full h-2 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c94a6a]/50"
           />
-        </div>
-        <div className="flex items-center justify-between text-xs font-medium tabular-nums text-[#7b4c5c]">
-          <span>{formatSeconds(currentTime)}</span>
-          <span className="text-[#9e6e7d]">0:20 — 1:30 Window</span>
-          <span>1:30</span>
         </div>
       </div>
 
@@ -413,8 +407,8 @@ export function GuzarishPlayer({
             type="button"
             onClick={handleRestartSegment}
             disabled={!isReady}
-            title="Restart from 0:20"
-            aria-label="Restart from 0:20"
+            title="Restart song"
+            aria-label="Restart song"
             className="glass-pill-button inline-flex items-center justify-center w-11 h-11 rounded-full text-[#5c3543] transition-transform duration-150 hover:scale-105 active:scale-95 disabled:opacity-50 cursor-pointer"
           >
             <RotateCcw className="w-4 h-4" />
@@ -424,7 +418,7 @@ export function GuzarishPlayer({
             type="button"
             onClick={() => setIsLooping((prev) => !prev)}
             aria-pressed={isLooping}
-            title="Loop 0:20 – 1:30"
+            title="Loop song"
             className={`inline-flex items-center gap-1.5 h-11 px-3.5 rounded-full text-xs font-medium transition-all duration-150 cursor-pointer whitespace-nowrap shrink-0 ${
               isLooping
                 ? 'bg-[#c94a6a]/15 text-[#a83152] border border-[#c94a6a]/30'
@@ -440,7 +434,7 @@ export function GuzarishPlayer({
           type="button"
           onClick={handleTogglePlay}
           disabled={!isReady && !hasError}
-          className="glass-accent-button inline-flex items-center justify-center gap-2 h-12 px-6 rounded-full text-sm font-semibold text-white transition-transform duration-150 hover:scale-[1.03] active:scale-[0.97] disabled:opacity-60 cursor-pointer whitespace-nowrap shrink-0"
+          className="glass-accent-button inline-flex items-center justify-center gap-2 h-12 px-7 rounded-full text-sm font-semibold text-white transition-transform duration-150 hover:scale-[1.03] active:scale-[0.97] disabled:opacity-60 cursor-pointer whitespace-nowrap shrink-0"
         >
           {isPlaying ? (
             <>
@@ -450,7 +444,7 @@ export function GuzarishPlayer({
           ) : (
             <>
               <Play className="w-4 h-4 fill-current ml-0.5" />
-              <span>{isReady ? 'Play 0:20 – 1:30' : 'Loading...'}</span>
+              <span>{isReady ? 'Play' : 'Loading...'}</span>
             </>
           )}
         </button>
@@ -477,7 +471,7 @@ export function GuzarishPlayer({
         onClick={() => {
           onSyncPoetryFade();
           if (playerRef.current && isReady && !isPlaying) {
-            startFromTwenty(false);
+            startFromSegment(false);
           } else {
             onSpawnEmoji('✨');
           }
@@ -485,7 +479,7 @@ export function GuzarishPlayer({
         className="w-full glass-pill-button rounded-2xl py-3 px-4 flex items-center justify-center gap-2 text-xs sm:text-sm font-medium text-[#5c3543] transition-transform duration-150 hover:scale-[1.01] active:scale-[0.99] cursor-pointer"
       >
         <Sparkles className="w-4 h-4 text-[#c94a6a]" />
-        <span>Replay Letter Fade-In With Guzarish</span>
+        <span>Replay Letter Fade-In With Song</span>
         <span className="ios-emoji">🥹💖</span>
       </button>
     </aside>

@@ -198,7 +198,7 @@ export function RomanticLetter({
       >
         <div className="text-xs text-[#7b4c5c]">
           {isSongPlaying ? (
-            <span>Listening to Guzarish (0:20–1:30) together <span className="ios-emoji">🎶</span></span>
+            <span>Listening to Good Luck Charm together <span className="ios-emoji">🎶</span></span>
           ) : (
             <span>Tap an emoji to float love across the screen <span className="ios-emoji">✨</span></span>
           )}

@@ -15,24 +15,17 @@ import {
 import { motion } from 'motion/react';
 import type { YTPlayerInstance } from '../types/youtube';
 
-export const PATA_START_SEC = 101; // 1:41
-export const PATA_END_SEC = 240; // 4:00
-const PATA_VIDEO_ID = 'JOX09U8noOE';
-const YT_FALLBACK_COVER = `https://i.ytimg.com/vi/${PATA_VIDEO_ID}/hqdefault.jpg`;
+export const PAL_START_SEC = 30; // 0:30
+export const PAL_END_SEC = 147; // 2:27
+const PAL_VIDEO_ID = 'YfqJktv2nuA';
+const YT_FALLBACK_COVER = `https://i.ytimg.com/vi/${PAL_VIDEO_ID}/hqdefault.jpg`;
 
-const VIBE_EMOJIS = ['🫠', '🌨️', '🌷', '✨', '💖', '🫶🏻'];
+const VIBE_EMOJIS = ['🙈', '🌷', '😘', '💖', '🫶🏻', '🥹'];
 
 interface PataChalgeaPageProps {
   onBack: () => void;
   onSpawnEmoji: (emoji: string, count?: number) => void;
   onTriggerShower: () => void;
-}
-
-function formatSeconds(sec: number): string {
-  const clamped = Math.max(0, Math.floor(sec));
-  const mins = Math.floor(clamped / 60);
-  const secs = clamped % 60;
-  return `${mins}:${secs.toString().padStart(2, '0')}`;
 }
 
 export function PataChalgeaPage({
@@ -50,15 +43,15 @@ export function PataChalgeaPage({
   const [isLooping, setIsLooping] = useState(true);
   const [showVideo, setShowVideo] = useState(false);
   const [hasError, setHasError] = useState(false);
-  const [currentTime, setCurrentTime] = useState(PATA_START_SEC);
+  const [currentTime, setCurrentTime] = useState(PAL_START_SEC);
   const [albumArtUrl, setAlbumArtUrl] = useState<string>(YT_FALLBACK_COVER);
   const [coverFailed, setCoverFailed] = useState(false);
 
-  // Fetch the official "Unforgettable" / "Pata Chalgea" album artwork from iTunes Search API
+  // Fetch the official "Pal Pal" album artwork from iTunes Search API
   useEffect(() => {
     const controller = new AbortController();
     fetch(
-      'https://itunes.apple.com/search?term=Imran+Khan+Pata+Chalgea&entity=song&limit=1',
+      'https://itunes.apple.com/search?term=Pal+Pal+Talwiinder&entity=song&limit=1',
       { signal: controller.signal }
     )
       .then((res) => (res.ok ? res.json() : null))
@@ -84,7 +77,7 @@ export function PataChalgeaPage({
     if (!containerRef.current || !window.YT?.Player || playerRef.current) return;
 
     playerRef.current = new window.YT.Player(containerRef.current, {
-      videoId: PATA_VIDEO_ID,
+      videoId: PAL_VIDEO_ID,
       playerVars: {
         autoplay: 1,
         controls: 0,
@@ -92,8 +85,8 @@ export function PataChalgeaPage({
         fs: 0,
         modestbranding: 1,
         rel: 0,
-        start: PATA_START_SEC,
-        end: PATA_END_SEC,
+        start: PAL_START_SEC,
+        end: PAL_END_SEC,
         playsinline: 1,
         origin: window.location.origin,
       },
@@ -101,7 +94,7 @@ export function PataChalgeaPage({
         onReady: (event) => {
           setIsReady(true);
           setHasError(false);
-          event.target.seekTo(PATA_START_SEC, true);
+          event.target.seekTo(PAL_START_SEC, true);
           event.target.playVideo();
         },
         onStateChange: (event) => {
@@ -110,18 +103,18 @@ export function PataChalgeaPage({
           if (event.data === YTState.PLAYING) {
             setIsPlaying(true);
             const now = event.target.getCurrentTime();
-            if (now < PATA_START_SEC - 0.5 || now >= PATA_END_SEC) {
-              event.target.seekTo(PATA_START_SEC, true);
+            if (now < PAL_START_SEC - 0.5 || now >= PAL_END_SEC) {
+              event.target.seekTo(PAL_START_SEC, true);
             }
           } else if (event.data === YTState.PAUSED) {
             setIsPlaying(false);
           } else if (event.data === YTState.ENDED) {
             if (isLoopingRef.current) {
-              event.target.seekTo(PATA_START_SEC, true);
+              event.target.seekTo(PAL_START_SEC, true);
               event.target.playVideo();
             } else {
               setIsPlaying(false);
-              setCurrentTime(PATA_END_SEC);
+              setCurrentTime(PAL_END_SEC);
             }
           }
         },
@@ -165,7 +158,7 @@ export function PataChalgeaPage({
     };
   }, [initPlayer]);
 
-  // Enforce 1:41 - 4:00 timelapse window continuously
+  // Enforce 0:30 - 2:27 timelapse silently in the background while playing
   useEffect(() => {
     if (!isPlaying || !playerRef.current) return;
 
@@ -176,27 +169,27 @@ export function PataChalgeaPage({
       const t = player.getCurrentTime();
       if (Number.isNaN(t)) return;
 
-      if (t < PATA_START_SEC - 0.5) {
-        player.seekTo(PATA_START_SEC, true);
-        setCurrentTime(PATA_START_SEC);
+      if (t < PAL_START_SEC - 0.5) {
+        player.seekTo(PAL_START_SEC, true);
+        setCurrentTime(PAL_START_SEC);
         return;
       }
 
-      if (t >= PATA_END_SEC) {
+      if (t >= PAL_END_SEC) {
         if (isLoopingRef.current) {
-          player.seekTo(PATA_START_SEC, true);
-          setCurrentTime(PATA_START_SEC);
+          player.seekTo(PAL_START_SEC, true);
+          setCurrentTime(PAL_START_SEC);
         } else {
           player.pauseVideo();
-          player.seekTo(PATA_START_SEC, true);
+          player.seekTo(PAL_START_SEC, true);
           setIsPlaying(false);
-          setCurrentTime(PATA_START_SEC);
+          setCurrentTime(PAL_START_SEC);
         }
         return;
       }
 
       setCurrentTime(t);
-    }, 220);
+    }, 200);
 
     return () => window.clearInterval(timer);
   }, [isPlaying]);
@@ -208,26 +201,26 @@ export function PataChalgeaPage({
       player.pauseVideo();
     } else {
       const now = player.getCurrentTime();
-      if (now < PATA_START_SEC || now >= PATA_END_SEC) {
-        player.seekTo(PATA_START_SEC, true);
-        setCurrentTime(PATA_START_SEC);
+      if (now < PAL_START_SEC || now >= PAL_END_SEC) {
+        player.seekTo(PAL_START_SEC, true);
+        setCurrentTime(PAL_START_SEC);
       }
       if (isMuted) {
         player.unMute();
         setIsMuted(false);
       }
       player.playVideo();
-      onSpawnEmoji('🫠', 2);
+      onSpawnEmoji('🌷', 2);
     }
   };
 
   const handleRestart = () => {
     const player = playerRef.current;
     if (!player || !isReady) return;
-    player.seekTo(PATA_START_SEC, true);
-    setCurrentTime(PATA_START_SEC);
+    player.seekTo(PAL_START_SEC, true);
+    setCurrentTime(PAL_START_SEC);
     player.playVideo();
-    onSpawnEmoji('🌨️', 2);
+    onSpawnEmoji('🙈', 2);
   };
 
   const handleToggleMute = () => {
@@ -243,10 +236,15 @@ export function PataChalgeaPage({
   };
 
   const handleSeek = (val: number) => {
-    const clamped = Math.min(PATA_END_SEC - 0.5, Math.max(PATA_START_SEC, val));
+    const clamped = Math.min(PAL_END_SEC - 0.5, Math.max(PAL_START_SEC, val));
     setCurrentTime(clamped);
     if (playerRef.current && isReady) {
+      if (isMuted) {
+        playerRef.current.unMute();
+        setIsMuted(false);
+      }
       playerRef.current.seekTo(clamped, true);
+      playerRef.current.playVideo();
     }
   };
 
@@ -258,10 +256,10 @@ export function PataChalgeaPage({
     }
   };
 
-  const totalWindow = PATA_END_SEC - PATA_START_SEC;
+  const totalWindow = PAL_END_SEC - PAL_START_SEC;
   const progressPercent = Math.min(
     100,
-    Math.max(0, ((currentTime - PATA_START_SEC) / totalWindow) * 100)
+    Math.max(0, ((currentTime - PAL_START_SEC) / totalWindow) * 100)
   );
 
   return (
@@ -290,28 +288,28 @@ export function PataChalgeaPage({
         >
           <Heart className="w-3.5 h-3.5 fill-current" />
           <span>Shower Love</span>
-          <span className="ios-emoji">🫠🌷</span>
+          <span className="ios-emoji">🙈🌷</span>
         </button>
       </div>
 
-      {/* Cute Frosted Glass Song Player — Pata Chalgea (1:41 – 4:00) */}
+      {/* Cute Frosted Glass Song Player — Pal Pal by Talwinder */}
       <motion.section
         initial={{ opacity: 0, y: 16, scale: 0.96, filter: 'blur(8px)' }}
         animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
         transition={{ duration: 0.85, ease: [0.22, 1, 0.36, 1] }}
-        aria-label="Pata Chalgea by Imran Khan music player"
+        aria-label="Pal Pal by Talwinder music player"
         className="glass-panel rounded-3xl p-6 sm:p-10 space-y-7"
       >
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <p className="text-xs font-medium tracking-wide text-[#8c5a6a]">
-              One More Vibe · 1:41 – 4:00 Timelapse <span className="ios-emoji">🎶</span>
+              One More Song <span className="ios-emoji">🎶✨</span>
             </p>
             <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl font-semibold text-[#351d26] mt-1">
-              Pata Chalgea
+              Pal Pal
             </h1>
             <p className="text-sm sm:text-base text-[#6e4956]">
-              Imran Khan · Unforgettable
+              Talwiinder · Afusic
             </p>
           </div>
 
@@ -351,7 +349,7 @@ export function PataChalgeaPage({
                   {!coverFailed ? (
                     <img
                       src={albumArtUrl}
-                      alt="Real album cover art for Pata Chalgea by Imran Khan from Unforgettable"
+                      alt="Official album cover art for Pal Pal by Talwiinder"
                       referrerPolicy="no-referrer"
                       onError={handleCoverError}
                       className="w-full h-full object-cover"
@@ -360,9 +358,9 @@ export function PataChalgeaPage({
                     <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-[#fadce6] to-[#fce7d8] text-[#6e4956] p-4 text-center">
                       <Disc3 className="w-10 h-10 text-[#c94a6a] mb-2" />
                       <span className="font-display text-lg font-semibold text-[#351d26]">
-                        Unforgettable
+                        Pal Pal
                       </span>
-                      <span className="text-xs">Imran Khan</span>
+                      <span className="text-xs">Talwiinder</span>
                     </div>
                   )}
                 </div>
@@ -395,22 +393,18 @@ export function PataChalgeaPage({
                     ))}
                   </div>
                   <span className="text-xs font-medium text-[#5c3543]">
-                    {isPlaying ? 'Vibing Now' : 'Ready to Play'} <span className="ios-emoji">🫠✨</span>
+                    {isPlaying ? 'Playing For You' : 'Ready to Play'} <span className="ios-emoji">🙈🌷</span>
                   </span>
                 </div>
 
                 <div>
                   <p className="font-display text-2xl sm:text-3xl font-semibold text-[#351d26]">
-                    Pata Chalgea
+                    Pal Pal
                   </p>
                   <p className="text-sm text-[#6e4956] mt-0.5">
-                    Imran Khan · Unforgettable (2009)
+                    Talwiinder · Afusic
                   </p>
                 </div>
-
-                <p className="text-xs text-[#8c5a6a] tabular-nums">
-                  Playing highlight · 1:41 to 4:00
-                </p>
               </div>
             </div>
           )}
@@ -420,10 +414,10 @@ export function PataChalgeaPage({
         {hasError && (
           <div className="rounded-2xl bg-white/75 border border-rose-200 px-4 py-3 text-xs text-[#6e4956] flex items-center justify-between gap-3">
             <span>
-              Playback was blocked by browser settings. Open Pata Chalgea directly at 1:41:
+              Playback was blocked by browser settings. Open Pal Pal directly:
             </span>
             <a
-              href={`https://www.youtube.com/watch?v=${PATA_VIDEO_ID}&t=${PATA_START_SEC}s`}
+              href={`https://www.youtube.com/watch?v=${PAL_VIDEO_ID}&t=${PAL_START_SEC}s`}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1 font-semibold text-[#b83b5e] hover:underline whitespace-nowrap shrink-0"
@@ -434,27 +428,22 @@ export function PataChalgeaPage({
           </div>
         )}
 
-        {/* Timelapse Scrubber (1:41 -> 4:00) */}
-        <div className="space-y-2">
+        {/* Clean Adjustable Song Progress Bar (No timelapse numbers shown) */}
+        <div className="py-1">
           <div className="relative flex items-center">
             <input
               type="range"
-              aria-label="Pata Chalgea song timelapse between 1:41 and 4:00"
-              min={PATA_START_SEC}
-              max={PATA_END_SEC}
-              step={0.5}
+              aria-label="Adjustable song progress"
+              min={PAL_START_SEC}
+              max={PAL_END_SEC}
+              step={0.25}
               value={currentTime}
               onChange={(e) => handleSeek(Number(e.target.value))}
               style={{
                 background: `linear-gradient(to right, #c94a6a 0%, #c94a6a ${progressPercent}%, rgba(180, 110, 130, 0.22) ${progressPercent}%, rgba(180, 110, 130, 0.22) 100%)`,
               }}
-              className="glass-slider w-full h-1.5 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c94a6a]/50"
+              className="glass-slider w-full h-2 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c94a6a]/50"
             />
-          </div>
-          <div className="flex items-center justify-between text-xs font-medium tabular-nums text-[#7b4c5c]">
-            <span>{formatSeconds(currentTime)}</span>
-            <span className="text-[#9e6e7d]">1:41 — 4:00 Window</span>
-            <span>4:00</span>
           </div>
         </div>
 
@@ -465,8 +454,8 @@ export function PataChalgeaPage({
               type="button"
               onClick={handleRestart}
               disabled={!isReady}
-              title="Restart from 1:41"
-              aria-label="Restart from 1:41"
+              title="Restart song"
+              aria-label="Restart song"
               className="glass-pill-button inline-flex items-center justify-center w-11 h-11 rounded-full text-[#5c3543] transition-transform duration-150 hover:scale-105 active:scale-95 disabled:opacity-50 cursor-pointer"
             >
               <RotateCcw className="w-4 h-4" />
@@ -501,7 +490,7 @@ export function PataChalgeaPage({
             ) : (
               <>
                 <Play className="w-4 h-4 fill-current ml-0.5" />
-                <span>{isReady ? 'Play 1:41 – 4:00' : 'Loading...'}</span>
+                <span>{isReady ? 'Play' : 'Loading...'}</span>
               </>
             )}
           </button>
@@ -531,8 +520,8 @@ export function PataChalgeaPage({
         className="glass-panel rounded-3xl px-6 sm:px-10 py-8 sm:py-10 text-center space-y-5"
       >
         <p className="font-display text-2xl sm:text-4xl font-semibold leading-snug text-[#351d26] [text-wrap:balance]">
-          “May you not understand lyrics, but u mean this to me — just enjoy the vibe my baby gurll{' '}
-          <span className="ios-emoji not-italic">🫠🌨️🌷✨</span>”
+          “These lyrics are only for you my sweetie, my heart beat{' '}
+          <span className="ios-emoji not-italic">🙈🌷😘</span>”
         </p>
 
         <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
